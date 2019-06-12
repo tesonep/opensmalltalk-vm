@@ -1225,7 +1225,6 @@ static sqInt NoDbgRegParms flushExternalPrimitiveOf(sqInt methodObj);
 static void NoDbgRegParms followForwardedFrameContentsstackPointer(char *theFP, char *theSP);
 static void NoDbgRegParms followForwardingPointersInStackZone(sqInt theBecomeEffectsFlags);
 extern sqInt forceInterruptCheck(void);
-extern void forceInterruptCheckFromHeartbeat(void);
 static sqInt NoDbgRegParms frameCallerContext(char *theFP);
 static sqInt NoDbgRegParms frameContext(char *theFP);
 static sqInt NoDbgRegParms frameHasContext(char *theFP);
@@ -1472,8 +1471,10 @@ static sqInt NeverInline writeImageFileIO(void);
 static sqInt NoDbgRegParms bindProcesstoId(sqInt aProcess, sqInt newId);
 static void cedeToHigherPriorityThreads(void);
 static sqInt NoDbgRegParms checkForEventsMayContextSwitch(sqInt mayContextSwitch);
+static void checkVMOwnershipFromHeartbeat(void);
 extern sqInt disownVM(sqInt flags);
 static sqInt enterSmalltalkExecutiveImplementation(void);
+extern void forceInterruptCheckFromHeartbeat(void);
 static sqInt getCogVMFlags(void);
 static sqInt getImageHeaderFlags(void);
 static sqInt inGUIThread(void);
@@ -1617,8 +1618,8 @@ _iss CogVMThread ** threads;
 _iss SpurNewSpaceSpace futureSpace;
 _iss sqInt mobileStart;
 _iss sqInt profileMethod;
-_iss sqInt mournQueue;
 _iss sqInt processHasThreadId;
+_iss sqInt mournQueue;
 _iss SpurNewSpaceSpace eden;
 _iss sqInt jmpDepth;
 _iss sqLong nextProfileTick;
@@ -1657,6 +1658,7 @@ _iss usqInt firstMobileObject;
 _iss sqInt highestRunnableProcessPriority;
 _iss sqInt lastMethodCacheProbeWrite;
 _iss usqLong nextWakeupUsecs;
+_iss sqInt relinquishing;
 _iss usqLong statGCEndUsecs;
 _iss usqLong longRunningPrimitiveStartUsecs;
 _iss usqLong longRunningPrimitiveStopUsecs;
@@ -1668,7 +1670,6 @@ _iss sqInt externalPrimitiveTableFirstFreeIndex;
 _iss usqLong gcStartUsecs;
 _iss sqInt marking;
 _iss sqLong oldSpaceUsePriorToScavenge;
-_iss sqInt relinquishing;
 _iss sqInt rememberedSetLimit;
 _iss sqInt statSurvivorCount;
 _iss sqInt thisClassIndex;
@@ -1684,6 +1685,7 @@ _iss sqInt shrinkThreshold;
 _iss usqLong statIOProcessEvents;
 _iss sqInt statMaxAllocSegmentTime;
 _iss sqInt statScavenges;
+_iss sqOSThread vmOSThread;
 _iss sqInt activeProcessAffined;
 _iss sqInt biasForGC;
 _iss sqInt edenBytes;
@@ -1695,7 +1697,6 @@ _iss sqInt savedWindowSize;
 _iss usqLong statAllocatedBytes;
 _iss sqInt statFullGCs;
 _iss sqInt statNumMaps;
-_iss sqOSThread vmOSThread;
 _iss sqInt anomaly;
 _iss sqInt bogon;
 _iss sqInt deferThreadSwitch;
@@ -1705,6 +1706,7 @@ _iss usqInt heapSizeAtPreviousGC;
 _iss sqInt interruptKeycode;
 _iss sqInt interruptPending;
 _iss sqInt longRunningPrimitiveCheckSequenceNumber;
+_iss sqInt memoryIsScarce;
 _iss usqLong nextPollUsecs;
 _iss sqLong osErrorCode;
 _iss usqLong statCompactionUsecs;
@@ -1728,7 +1730,6 @@ _iss sqInt imageFloatsBigEndian;
 _iss sqInt imageHeaderFlags;
 _iss sqInt longRunningPrimitiveSignalUndelivered;
 _iss sqInt maxExtSemTabSizeSet;
-_iss sqInt memoryIsScarce;
 _iss sqInt methodDictLinearSearchLimit;
 _iss sqInt refCountToShrinkRT;
 _iss sqInt signalLowSpace;
@@ -54767,38 +54768,6 @@ forceInterruptCheck(void)
 	return 0;
 }
 
-
-/*	Force an interrupt check ASAP. This version is the
-	entry-point to forceInterruptCheck for the heartbeat
-	timer to allow for repeatable debugging. */
-
-	/* StackInterpreter>>#forceInterruptCheckFromHeartbeat */
-void
-forceInterruptCheckFromHeartbeat(void)
-{   DECL_MAYBE_SQ_GLOBAL_STRUCT
-	if (!suppressHeartbeatFlag) {
-		/* begin checkForLongRunningPrimitive */
-		if (GIV(longRunningPrimitiveCheckSemaphore) == null) {
-			goto l1;
-		}
-		if ((GIV(longRunningPrimitiveStartUsecs) > 0)
-		 && ((GIV(longRunningPrimitiveCheckMethod) == GIV(newMethod))
-		 && (GIV(longRunningPrimitiveCheckSequenceNumber) == GIV(statCheckForEvents)))) {
-			GIV(longRunningPrimitiveStopUsecs) = ioUTCMicroseconds();
-			assert(GIV(longRunningPrimitiveStopUsecs) > GIV(longRunningPrimitiveStartUsecs));
-			goto l1;
-		}
-		if (GIV(longRunningPrimitiveStopUsecs) == 0) {
-			GIV(longRunningPrimitiveCheckSequenceNumber) = GIV(statCheckForEvents);
-			GIV(longRunningPrimitiveCheckMethod) = GIV(newMethod);
-			GIV(longRunningPrimitiveStartUsecs) = ioUTCMicroseconds();
-			sqLowLevelMFence();
-		}
-	l1:	/* end checkForLongRunningPrimitive */;
-		forceInterruptCheck();
-	}
-}
-
 	/* StackInterpreter>>#frameCallerContext: */
 static sqInt NoDbgRegParms
 frameCallerContext(char *theFP)
@@ -65737,6 +65706,63 @@ checkForEventsMayContextSwitch(sqInt mayContextSwitch)
 }
 
 
+/*	Check whether the VM is unowned and needs to set a thread running to try
+	and own it.
+	Do not attempt this if the image doesn't have a threadId inst var in
+	Process; the VM
+	can't thread these images. */
+
+	/* StackInterpreterMT>>#checkVMOwnershipFromHeartbeat */
+static void
+checkVMOwnershipFromHeartbeat(void)
+{   DECL_MAYBE_SQ_GLOBAL_STRUCT
+    CogVMThread *vmThread;
+
+	sqLowLevelMFence();
+	if (GIV(processHasThreadId)
+	 && ((getVMOwner()) == 0)) {
+		/* begin ensureRunningVMThread: */
+		if (!(tryLockVMToIndex(-1))) {
+
+			/* self cCode: [coInterpreter print: 'ERVT failed to lock'; cr]. */
+			goto l1;
+		}
+		if ((vmThread = willingVMThread())) {
+
+			/* If the VM is relinquishing the processor then only schedule a thread if it has work to do. */
+			if (GIV(relinquishing)
+			 && (((vmThread->state)) != CTMWantingOwnership)) {
+				/* begin releaseVM */
+				setVMOwner(0);
+				goto l1;
+			}
+			setVMOwner((vmThread->index));
+			GIV(vmOSThread) = (vmThread->osThread);
+			ioSignalOSSemaphore((&((vmThread->osSemaphore))));
+			ioTransferTimeslice();
+			goto l1;
+		}
+		if (GIV(relinquishing)) {
+			/* begin releaseVM */
+			setVMOwner(0);
+			goto l1;
+		}
+		if (GIV(memoryIsScarce)
+		 || (((vmThread = unusedThreadInfo())) == null)) {
+			/* begin releaseVM */
+			setVMOwner(0);
+			goto l1;
+		}
+		setVMOwner((vmThread->index));
+		if (!(startThreadForThreadInfo(vmThread))) {
+			/* begin releaseVM */
+			setVMOwner(0);
+		}
+	l1:	/* end ensureRunningVMThread: */;
+	}
+}
+
+
 /*	Release the VM to other threads and answer the current thread's index.
 	Currently valid flags:
 	DisownVMLockOutFullGC	- prevent fullGCs while this thread disowns the VM
@@ -65891,6 +65917,42 @@ enterSmalltalkExecutiveImplementation(void)
 	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), 1, __LINE__);
 	interpret();
 	return 0;
+}
+
+
+/*	Force an interrupt check ASAP. This version is the
+	entry-point to forceInterruptCheck for the heartbeat
+	timer to allow for repeatable debugging.
+	
+	N.B. SYNCHRONIZE WITH deferStackLimitSmashAround: */
+
+	/* StackInterpreterMT>>#forceInterruptCheckFromHeartbeat */
+void
+forceInterruptCheckFromHeartbeat(void)
+{   DECL_MAYBE_SQ_GLOBAL_STRUCT
+	if (!suppressHeartbeatFlag) {
+		/* begin checkForLongRunningPrimitive */
+		if (GIV(longRunningPrimitiveCheckSemaphore) == null) {
+			goto l1;
+		}
+		if ((GIV(longRunningPrimitiveStartUsecs) > 0)
+		 && ((GIV(longRunningPrimitiveCheckMethod) == GIV(newMethod))
+		 && (GIV(longRunningPrimitiveCheckSequenceNumber) == GIV(statCheckForEvents)))) {
+			GIV(longRunningPrimitiveStopUsecs) = ioUTCMicroseconds();
+			assert(GIV(longRunningPrimitiveStopUsecs) > GIV(longRunningPrimitiveStartUsecs));
+			goto l1;
+		}
+		if (GIV(longRunningPrimitiveStopUsecs) == 0) {
+			GIV(longRunningPrimitiveCheckSequenceNumber) = GIV(statCheckForEvents);
+			GIV(longRunningPrimitiveCheckMethod) = GIV(newMethod);
+			GIV(longRunningPrimitiveStartUsecs) = ioUTCMicroseconds();
+			sqLowLevelMFence();
+		}
+	l1:	/* end checkForLongRunningPrimitive */;
+		sqLowLevelMFence();
+		forceInterruptCheck();
+		checkVMOwnershipFromHeartbeat();
+	}
 }
 
 
