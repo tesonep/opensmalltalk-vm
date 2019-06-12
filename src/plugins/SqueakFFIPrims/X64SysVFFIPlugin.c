@@ -1319,7 +1319,7 @@ ffiArgumentSpecClassin(sqInt oop, sqInt argSpec, sqInt argClass, CalloutState *c
 				   the call if it is threaded and the object is young, since it may move during the call. */
 				if ((((calloutState->callFlags)) & FFICallFlagThreaded)
 				 && (((!isAlien)
-				 || ((assert(isAlien(oop)),
+				 || ((
 				(longAt(oop + BaseHeaderSize)) > 0)))
 				 && (isYoung(oop)))) {
 					return -PrimErrObjectMayMove;
@@ -1698,7 +1698,7 @@ ffiAtomicArgByReferenceClassin(sqInt oop, sqInt oopClass, CalloutState *calloutS
 	   the call if it is threaded and the object is young, since it may move during the call. */
 	if ((((calloutState->callFlags)) & FFICallFlagThreaded)
 	 && (((!isAlien)
-	 || ((assert(isAlien(oop)),
+	 || ((
 	(longAt(oop + BaseHeaderSize)) > 0)))
 	 && (isYoung(oop)))) {
 		return -PrimErrObjectMayMove;
