@@ -1,5 +1,5 @@
 /* This is an automatically generated table of all builtin modules in the VM
-   StackInterpreterPrimitives VMMaker.oscog-eem.962
+   StackInterpreterMT * VMMaker-CompatibleUserName.1559896946
  */
 
 extern sqExport vm_exports[];

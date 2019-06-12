@@ -5,12 +5,13 @@
 
 VMSRCDIR:=../../spurstack64src/vm
 VM:=Pharo
-COGDEFS:= -DPharoVM=1
+COGDEFS:= -DPharoVM=1  -DCOGMTVM=1
 APPNAME:=Pharo
 APPNAMEDEF:=$(APPNAME)
 APPIDENTIFIER:=org.pharo.$(APPNAME)
 USEPLUGINASDYLIB:=TRUE
-THIRDPARTYLIBS:=pkgconfig freetype2 openssl libssh2 libsdl2 pixman libpng cairo
+THIRDPARTYLIBS:=pkgconfig freetype2 openssl libssh2 libgit2 libsdl2 pixman libpng cairo
+MTSUFFIX:=mt
 
 # Now include the Makefile proper, which is common to all Mac OS builds.
 #
@@ -22,7 +23,7 @@ include ../third-party/Makefile.pkgconfig
 include ../third-party/Makefile.freetype2
 include ../third-party/Makefile.openssl
 include ../third-party/Makefile.libssh2
-#include ../third-party/Makefile.libgit2
+include ../third-party/Makefile.libgit2
 include ../third-party/Makefile.libsdl2
 include ../third-party/Makefile.pixman
 include ../third-party/Makefile.libpng

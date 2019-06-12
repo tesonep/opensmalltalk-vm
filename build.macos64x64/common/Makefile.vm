@@ -50,7 +50,7 @@ OSXCLASSESDIR:=$(PLATDIR)/iOS/vm/Common/Classes
 OSXPLUGINSDIR:=$(PLATDIR)/iOS/plugins
 UNIXVMDIR:=$(PLATDIR)/unix/vm
 
-MAKERSRC:=$(wildcard $(VMSRCDIR)/gcc3x-*interp.c $(VMSRCDIR)/cogit.c)
+MAKERSRC:=$(wildcard $(VMSRCDIR)/gcc3x-*interp$(MTSUFFIX).c $(VMSRCDIR)/cogit.c)
 CROSSSRC:= $(wildcard $(CROSSDIR)/*.c)
 #XEX:= ... %/sqMacV2Browser.m ...
 XEX:=%/sqSqueakMainApplication+screen.m %/sqMacV2Window.m \
