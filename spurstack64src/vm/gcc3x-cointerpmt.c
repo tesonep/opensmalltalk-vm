@@ -690,6 +690,7 @@ static void primitiveUtcAndTimezoneOffset(void);
 EXPORT(sqInt) primitiveUtcWithOffset(void);
 static void primitiveVMPath(void);
 static void primitiveVMProfileSamplesInto(void);
+static void primitiveWait(void);
 static void primitiveYield(void);
 extern sqInt signalNoResume(sqInt aSemaphore);
 extern int signed32BitValueOf(sqInt oop);
@@ -1227,6 +1228,7 @@ static sqInt NoDbgRegParms flushExternalPrimitiveOf(sqInt methodObj);
 static void NoDbgRegParms followForwardedFrameContentsstackPointer(char *theFP, char *theSP);
 static void NoDbgRegParms followForwardingPointersInStackZone(sqInt theBecomeEffectsFlags);
 extern sqInt forceInterruptCheck(void);
+extern void forceInterruptCheckFromHeartbeat(void);
 static sqInt NoDbgRegParms frameCallerContext(char *theFP);
 static sqInt NoDbgRegParms frameContext(char *theFP);
 static sqInt NoDbgRegParms frameHasContext(char *theFP);
@@ -1457,6 +1459,7 @@ extern sqInt stSizeOf(sqInt oop);
 extern sqInt superclassOf(sqInt classPointer);
 extern sqInt tempCountOf(sqInt methodPointer);
 extern sqInt temporaryCountOfMethodHeader(sqInt header);
+static void NoDbgRegParms transferTo(sqInt newProc);
 extern sqInt ultimateLiteralOf(sqInt aMethodOop);
 static sqInt NoDbgRegParms NeverInline unfollowatIndex(sqInt litVar, sqInt literalIndex);
 static sqInt NoDbgRegParms updateDisplayLeftTopRightBottom(sqInt l, sqInt t, sqInt r, sqInt b);
@@ -1472,10 +1475,8 @@ static sqInt NeverInline writeImageFileIO(void);
 static sqInt NoDbgRegParms bindProcesstoId(sqInt aProcess, sqInt newId);
 static void cedeToHigherPriorityThreads(void);
 static sqInt NoDbgRegParms checkForEventsMayContextSwitch(sqInt mayContextSwitch);
-static void checkVMOwnershipFromHeartbeat(void);
 extern sqInt disownVM(sqInt flags);
 static sqInt enterSmalltalkExecutiveImplementation(void);
-extern void forceInterruptCheckFromHeartbeat(void);
 static sqInt getCogVMFlags(void);
 static sqInt getImageHeaderFlags(void);
 static sqInt inGUIThread(void);
@@ -1497,7 +1498,6 @@ static void primitiveResume(void);
 static void primitiveScreenSize(void);
 static void primitiveSuspend(void);
 EXPORT(void) primitiveVMCurrentThreadId(void);
-static void primitiveWait(void);
 static sqInt NoDbgRegParms resumepreemptedYieldingIffrom(sqInt aProcess, sqInt yieldImplicitly, sqInt sourceCode);
 static sqInt NoDbgRegParms returnToExecutivepostContextSwitch(sqInt inInterpreter, sqInt switchedContext);
 static void NoDbgRegParms returnToSchedulingLoopAndReleaseVMOrWakeThreadsource(CogVMThread *vmThread, sqInt source);
@@ -1568,9 +1568,9 @@ _iss sqInt primFailCode;
 _iss usqInt method;
 _iss sqInt nilObj;
 _iss StackPage * stackPage;
+_iss char * framePointer;
 _iss sqInt argumentCount;
 _iss sqInt bytecodeSetSelector;
-_iss char * framePointer;
 _iss usqInt freeStart;
 _iss sqInt specialObjectsOop;
 _iss usqInt endOfMemory;
@@ -1595,10 +1595,10 @@ _iss sqInt markStack;
 _iss char * stackLimit;
 _iss sqInt rememberedSetSize;
 _iss sqInt bytesPerPage;
+_iss StackPage * mostRecentlyUsedPage;
 _iss sqInt * rememberedSet;
 _iss SpurContiguousObjStack savedFirstFieldsSpace;
 _iss sqInt weaklingStack;
-_iss StackPage * mostRecentlyUsedPage;
 _iss usqInt freeListsMask;
 _iss usqInt firstFreeObject;
 _iss sqInt classTableFirstPage;
@@ -1620,8 +1620,8 @@ _iss CogVMThread ** threads;
 _iss SpurNewSpaceSpace futureSpace;
 _iss sqInt mobileStart;
 _iss sqInt profileMethod;
-_iss sqInt processHasThreadId;
 _iss sqInt mournQueue;
+_iss sqInt processHasThreadId;
 _iss SpurNewSpaceSpace eden;
 _iss sqInt jmpDepth;
 _iss sqLong nextProfileTick;
@@ -1660,17 +1660,18 @@ _iss usqInt firstMobileObject;
 _iss sqInt highestRunnableProcessPriority;
 _iss sqInt lastMethodCacheProbeWrite;
 _iss usqLong nextWakeupUsecs;
-_iss sqInt relinquishing;
 _iss usqLong statGCEndUsecs;
 _iss usqLong longRunningPrimitiveStartUsecs;
 _iss usqLong longRunningPrimitiveStopUsecs;
 _iss usqLong statCheckForEvents;
+_iss usqLong statProcessSwitch;
 _iss sqInt statTenures;
 _iss sqInt weakList;
 _iss sqInt externalPrimitiveTableFirstFreeIndex;
 _iss usqLong gcStartUsecs;
 _iss sqInt marking;
 _iss sqLong oldSpaceUsePriorToScavenge;
+_iss sqInt relinquishing;
 _iss sqInt rememberedSetLimit;
 _iss sqInt statSurvivorCount;
 _iss sqInt thisClassIndex;
@@ -1685,9 +1686,7 @@ _iss FILE * scavengeLog;
 _iss sqInt shrinkThreshold;
 _iss usqLong statIOProcessEvents;
 _iss sqInt statMaxAllocSegmentTime;
-_iss usqLong statProcessSwitch;
 _iss sqInt statScavenges;
-_iss sqOSThread vmOSThread;
 _iss sqInt activeProcessAffined;
 _iss sqInt biasForGC;
 _iss sqInt edenBytes;
@@ -1699,6 +1698,7 @@ _iss sqInt savedWindowSize;
 _iss usqLong statAllocatedBytes;
 _iss sqInt statFullGCs;
 _iss sqInt statNumMaps;
+_iss sqOSThread vmOSThread;
 _iss sqInt anomaly;
 _iss sqInt bogon;
 _iss sqInt deferThreadSwitch;
@@ -1708,7 +1708,6 @@ _iss usqInt heapSizeAtPreviousGC;
 _iss sqInt interruptKeycode;
 _iss sqInt interruptPending;
 _iss sqInt longRunningPrimitiveCheckSequenceNumber;
-_iss sqInt memoryIsScarce;
 _iss usqLong nextPollUsecs;
 _iss sqLong osErrorCode;
 _iss usqLong statCompactionUsecs;
@@ -1732,6 +1731,7 @@ _iss sqInt imageFloatsBigEndian;
 _iss sqInt imageHeaderFlags;
 _iss sqInt longRunningPrimitiveSignalUndelivered;
 _iss sqInt maxExtSemTabSizeSet;
+_iss sqInt memoryIsScarce;
 _iss sqInt methodDictLinearSearchLimit;
 _iss sqInt refCountToShrinkRT;
 _iss sqInt signalLowSpace;
@@ -18786,7 +18786,6 @@ primitiveEnterCriticalSection(void)
     char *sp;
     char *sp1;
     char *sp2;
-    sqInt x;
 
 	if (GIV(argumentCount) > 0) {
 
@@ -18838,9 +18837,7 @@ primitiveEnterCriticalSection(void)
 	longAtput((sp2 = GIV(stackPointer) + (((GIV(argumentCount) + 1) - 1) * BytesPerWord)), GIV(falseObj));
 	GIV(stackPointer) = sp2;
 	addLastLinktoList(activeProc, criticalSection);
-	/* begin transferTo: */
-	x = wakeHighestPriority();
-	error("lala");
+	transferTo(wakeHighestPriority());
 }
 
 	/* InterpreterPrimitives>>#primitiveEqual */
@@ -29205,6 +29202,44 @@ primitiveVMProfileSamplesInto(void)
 	GIV(stackPointer) = sp1;
 }
 
+	/* InterpreterPrimitives>>#primitiveWait */
+static void
+primitiveWait(void)
+{   DECL_MAYBE_SQ_GLOBAL_STRUCT
+    sqInt activeProc;
+    sqInt excessSignals;
+    sqInt objOop;
+    sqInt objOop1;
+    sqInt sema;
+
+
+	/* rcvr */
+	sema = longAt(GIV(stackPointer));
+	excessSignals = fetchIntegerofObject(ExcessSignalsIndex, sema);
+	if (excessSignals > 0) {
+		/* begin storeInteger:ofObject:withValue: */
+		if ((((((usqInt) (excessSignals - 1)) >> 60) + 1) & 15) <= 1) {
+			/* begin storePointerUnchecked:ofObject:withValue: */
+			assert(!(isOopForwarded(sema)));
+			longAtput((sema + BaseHeaderSize) + (((sqInt)((usqInt)(ExcessSignalsIndex) << (shiftForWord())))), (((usqInt)(excessSignals - 1) << 3) | 1));
+		}
+		else {
+			/* begin primitiveFail */
+			if (!GIV(primFailCode)) {
+				GIV(primFailCode) = 1;
+			}
+		}
+	}
+	else {
+		/* begin fetchPointer:ofObject: */
+		objOop1 = longAt((GIV(specialObjectsOop) + BaseHeaderSize) + (((sqInt)((usqInt)(SchedulerAssociation) << (shiftForWord())))));
+		objOop = longAt((objOop1 + BaseHeaderSize) + (((sqInt)((usqInt)(ValueIndex) << (shiftForWord())))));
+		activeProc = longAt((objOop + BaseHeaderSize) + (((sqInt)((usqInt)(ActiveProcessIndex) << (shiftForWord())))));
+		addLastLinktoList(activeProc, sema);
+		transferTo(wakeHighestPriority());
+	}
+}
+
 
 /*	Primitively do the equivalent of Process>yield, avoiding the overhead of a
 	fork and a wait in the standard implementation.
@@ -29221,7 +29256,6 @@ primitiveYield(void)
     sqInt processList;
     sqInt processLists;
     sqInt scheduler;
-    sqInt x;
 
 	/* begin fetchPointer:ofObject: */
 	objOop = longAt((GIV(specialObjectsOop) + BaseHeaderSize) + (((sqInt)((usqInt)(SchedulerAssociation) << (shiftForWord())))));
@@ -29236,9 +29270,7 @@ primitiveYield(void)
 	if (!((assert(!(isForwarded(processList))),
 		(longAt((processList + BaseHeaderSize) + (((sqInt)((usqInt)(FirstLinkIndex) << (shiftForWord())))))) == GIV(nilObj)))) {
 		addLastLinktoList(activeProc, processList);
-		/* begin transferTo: */
-		x = wakeHighestPriority();
-		error("lala");
+		transferTo(wakeHighestPriority());
 	}
 }
 
@@ -51678,8 +51710,6 @@ callbackEnter(sqInt *callbackID)
 {   DECL_MAYBE_VOLATILE_SQ_GLOBAL_STRUCT
     volatile sqInt header;
     volatile jmp_buf savedReenterInterpreter;
-    volatile sqInt x;
-    volatile sqInt x1;
     volatile sqInt xArray;
 
 	if (!(asserta(primitiveFunctionPointer != 0))) {
@@ -51698,9 +51728,7 @@ callbackEnter(sqInt *callbackID)
 	xArray = longAt((GIV(specialObjectsOop) + BaseHeaderSize) + (((sqInt)((usqInt)(ExternalObjectsArray) << (shiftForWord())))));
 	doSignalExternalSemaphores(numSlotsOf(xArray));
 	if ((GIV(suspendedCallbacks)[GIV(jmpDepth)]) == (activeProcess())) {
-		/* begin transferTo: */
-		x = wakeHighestPriority();
-		error("lala");
+		transferTo(wakeHighestPriority());
 	}
 	forceInterruptCheck();
 	memcpy(((void *)savedReenterInterpreter), reenterInterpreter, sizeof(jmp_buf));
@@ -51713,9 +51741,7 @@ callbackEnter(sqInt *callbackID)
 	}
 	memcpy(reenterInterpreter, ((void *) savedReenterInterpreter), sizeof(jmp_buf));
 	putToSleepyieldingIf(activeProcess(), GIV(preemptionYields));
-	/* begin transferTo: */
-	x1 = GIV(suspendedCallbacks)[GIV(jmpDepth)];
-	error("lala");
+	transferTo(GIV(suspendedCallbacks)[GIV(jmpDepth)]);
 
 	/* see comment above */
 	GIV(newMethod) = GIV(suspendedMethods)[GIV(jmpDepth)];
@@ -54748,6 +54774,38 @@ forceInterruptCheck(void)
 	}
 	GIV(statForceInterruptCheck) += 1;
 	return 0;
+}
+
+
+/*	Force an interrupt check ASAP. This version is the
+	entry-point to forceInterruptCheck for the heartbeat
+	timer to allow for repeatable debugging. */
+
+	/* StackInterpreter>>#forceInterruptCheckFromHeartbeat */
+void
+forceInterruptCheckFromHeartbeat(void)
+{   DECL_MAYBE_SQ_GLOBAL_STRUCT
+	if (!suppressHeartbeatFlag) {
+		/* begin checkForLongRunningPrimitive */
+		if (GIV(longRunningPrimitiveCheckSemaphore) == null) {
+			goto l1;
+		}
+		if ((GIV(longRunningPrimitiveStartUsecs) > 0)
+		 && ((GIV(longRunningPrimitiveCheckMethod) == GIV(newMethod))
+		 && (GIV(longRunningPrimitiveCheckSequenceNumber) == GIV(statCheckForEvents)))) {
+			GIV(longRunningPrimitiveStopUsecs) = ioUTCMicroseconds();
+			assert(GIV(longRunningPrimitiveStopUsecs) > GIV(longRunningPrimitiveStartUsecs));
+			goto l1;
+		}
+		if (GIV(longRunningPrimitiveStopUsecs) == 0) {
+			GIV(longRunningPrimitiveCheckSequenceNumber) = GIV(statCheckForEvents);
+			GIV(longRunningPrimitiveCheckMethod) = GIV(newMethod);
+			GIV(longRunningPrimitiveStartUsecs) = ioUTCMicroseconds();
+			sqLowLevelMFence();
+		}
+	l1:	/* end checkForLongRunningPrimitive */;
+		forceInterruptCheck();
+	}
 }
 
 	/* StackInterpreter>>#frameCallerContext: */
@@ -61984,8 +62042,7 @@ resumepreemptedYieldingIf(sqInt aProcess, sqInt yieldImplicitly)
 		return 0;
 	}
 	putToSleepyieldingIf(activeProc, yieldImplicitly);
-	/* begin transferTo: */
-	error("lala");
+	transferTo(aProcess);
 	return 1;
 }
 
@@ -64594,6 +64651,184 @@ temporaryCountOfMethodHeader(sqInt header)
 	return (((usqInt) header) >> MethodHeaderTempCountShift) & 0x3F;
 }
 
+
+/*	Record a process to be awoken on the next interpreter cycle. */
+
+	/* StackInterpreter>>#transferTo: */
+static void NoDbgRegParms
+transferTo(sqInt newProc)
+{   DECL_MAYBE_SQ_GLOBAL_STRUCT
+    sqInt activeContext;
+    sqInt aMethodObj;
+    sqInt index;
+    StackPage *lastUsedPage;
+    usqInt lip;
+    StackPage *lruOrFree;
+    sqInt newContext;
+    StackPage *newPage;
+    sqInt objOop;
+    sqInt oldProc;
+    sqInt sched;
+    sqInt senderOop;
+    char *sp;
+    char *theFrame;
+    StackPage *thePage;
+    sqInt top;
+    sqInt valuePointer;
+    sqInt valuePointer1;
+
+	GIV(statProcessSwitch) += 1;
+	/* begin push: */
+	longAtput((sp = GIV(stackPointer) - BytesPerWord), GIV(instructionPointer));
+	GIV(stackPointer) = sp;
+	/* begin externalWriteBackHeadFramePointers */
+	assert((GIV(framePointer) - GIV(stackPointer)) < (LargeContextSlots * BytesPerOop));
+	assert(GIV(stackPage) == (mostRecentlyUsedPage()));
+	assert(!((isFree(GIV(stackPage)))));
+	/* begin setHeadFP:andSP:inPage: */
+	assert(GIV(stackPointer) < GIV(framePointer));
+	assert((GIV(stackPointer) < ((GIV(stackPage)->baseAddress)))
+	 && (GIV(stackPointer) > (((GIV(stackPage)->realStackLimit)) - (LargeContextSlots * BytesPerOop))));
+	assert((GIV(framePointer) < ((GIV(stackPage)->baseAddress)))
+	 && (GIV(framePointer) > (((GIV(stackPage)->realStackLimit)) - ((LargeContextSlots * BytesPerOop) / 2))));
+	(GIV(stackPage)->headFP = GIV(framePointer));
+	(GIV(stackPage)->headSP = GIV(stackPointer));
+	assert(pageListIsWellFormed());
+	/* begin assertValidExecutionPointe:r:s: */
+	lip = GIV(instructionPointer) + 1;
+	assertValidExecutionPointersimbarline(lip, GIV(framePointer), GIV(stackPointer), !0, __LINE__);
+	/* begin schedulerPointer */
+	objOop = longAt((GIV(specialObjectsOop) + BaseHeaderSize) + (((sqInt)((usqInt)(SchedulerAssociation) << (shiftForWord())))));
+	sched = longAt((objOop + BaseHeaderSize) + (((sqInt)((usqInt)(ValueIndex) << (shiftForWord())))));
+	/* begin fetchPointer:ofObject: */
+	oldProc = longAt((sched + BaseHeaderSize) + (((sqInt)((usqInt)(ActiveProcessIndex) << (shiftForWord())))));
+	/* begin ensureFrameIsMarried:SP: */
+	if ((byteAt((GIV(framePointer) + FoxFrameFlags) + 2)) != 0) {
+		assert(isContext(frameContext(GIV(framePointer))));
+		activeContext = longAt(GIV(framePointer) + FoxThisContext);
+		goto l3;
+	}
+	activeContext = marryFrameSP(GIV(framePointer), GIV(stackPointer) + BytesPerWord);
+	l3:	/* end ensureFrameIsMarried:SP: */;
+	/* begin storePointer:ofObject:withValue: */
+	assert(!(isForwarded(oldProc)));
+	if ((assert(isNonImmediate(oldProc)),
+	oopisGreaterThanOrEqualTo(oldProc, GIV(oldSpaceStart)))) {
+
+		/* most stores into young objects */
+		if (((activeContext & (tagMask())) == 0)
+		 && (oopisLessThan(activeContext, GIV(newSpaceLimit)))) {
+			/* begin possibleRootStoreInto: */
+			if (!(((((usqInt) (longAt(oldProc))) >> (rememberedBitShift())) & 1) != 0)) {
+				remember(oldProc);
+			}
+		}
+	}
+	longAtput((oldProc + BaseHeaderSize) + (((sqInt)((usqInt)(SuspendedContextIndex) << (shiftForWord())))), activeContext);
+	/* begin storePointer:ofObject:withValue: */
+	assert(!(isForwarded(sched)));
+	if ((assert(isNonImmediate(sched)),
+	oopisGreaterThanOrEqualTo(sched, GIV(oldSpaceStart)))) {
+
+		/* most stores into young objects */
+		if (((newProc & (tagMask())) == 0)
+		 && (oopisLessThan(newProc, GIV(newSpaceLimit)))) {
+			/* begin possibleRootStoreInto: */
+			if (!(((((usqInt) (longAt(sched))) >> (rememberedBitShift())) & 1) != 0)) {
+				remember(sched);
+			}
+		}
+	}
+	longAtput((sched + BaseHeaderSize) + (((sqInt)((usqInt)(ActiveProcessIndex) << (shiftForWord())))), newProc);
+	/* begin storePointerUnchecked:ofObject:withValue: */
+	valuePointer = GIV(nilObj);
+	assert(!(isOopForwarded(newProc)));
+	longAtput((newProc + BaseHeaderSize) + (((sqInt)((usqInt)(MyListIndex) << (shiftForWord())))), valuePointer);
+	/* begin externalSetStackPageAndPointersForSuspendedContextOfProcess: */
+	newContext = longAt((newProc + BaseHeaderSize) + (((sqInt)((usqInt)(SuspendedContextIndex) << (shiftForWord())))));
+	assert(isContext(newContext));
+	if (((((longAt((newContext + BaseHeaderSize) + (((sqInt)((usqInt)(SenderIndex) << (shiftForWord()))))))) & 7) == 1)) {
+		assert(checkIsStillMarriedContextcurrentFP(newContext, GIV(framePointer)));
+	}
+	/* begin storePointerUnchecked:ofObject:withValue: */
+	valuePointer1 = GIV(nilObj);
+	assert(!(isOopForwarded(newProc)));
+	longAtput((newProc + BaseHeaderSize) + (((sqInt)((usqInt)(SuspendedContextIndex) << (shiftForWord())))), valuePointer1);
+	if ((((((longAt((newContext + BaseHeaderSize) + (((sqInt)((usqInt)(SenderIndex) << (shiftForWord()))))))) & 7) == 1))
+	 && (!(isWidowedContext(newContext)))) {
+		/* begin frameOfMarriedContext: */
+		senderOop = longAt((newContext + BaseHeaderSize) + (((sqInt)((usqInt)(SenderIndex) << (shiftForWord())))));
+		assert((((senderOop) & 7) == 1));
+		theFrame = pointerForOop(senderOop - 1);
+		/* begin stackPageFor: */
+		index = pageIndexForstackMemorybytesPerPage(theFrame, GIV(stackMemory), GIV(bytesPerPage));
+		thePage = stackPageAtpages(index, GIV(pages));
+		if (theFrame != ((thePage->headFP))) {
+
+			/* explicit assignment of suspendedContext can cause switch to interior frame. */
+			/* begin newStackPage */
+			lruOrFree = (GIV(mostRecentlyUsedPage)->nextPage);
+			if (((lruOrFree->baseFP)) == 0) {
+				newPage = lruOrFree;
+				goto l14;
+			}
+			divorceFramesIn(lruOrFree);
+			newPage = lruOrFree;
+	l14:	/* end newStackPage */;
+			moveFramesInthroughtoPage(thePage, findFrameAboveinPage(theFrame, thePage), newPage);
+			/* begin markStackPageLeastMostRecentlyUsed: */
+			assert(newPage == ((GIV(mostRecentlyUsedPage)->nextPage)));
+			lastUsedPage = (newPage->nextPage);
+			while (((lastUsedPage->baseFP)) == 0) {
+				lastUsedPage = (lastUsedPage->nextPage);
+			}
+			if (((lastUsedPage->nextPage)) == newPage) {
+				goto l10;
+			}
+			(((newPage->prevPage))->nextPage = (newPage->nextPage));
+			(((newPage->nextPage))->prevPage = (newPage->prevPage));
+			(((lastUsedPage->prevPage))->nextPage = newPage);
+			(newPage->prevPage = (lastUsedPage->prevPage));
+			(newPage->nextPage = lastUsedPage);
+			(lastUsedPage->prevPage = newPage);
+			assert(pageListIsWellFormed());
+	l10:	/* end markStackPageLeastMostRecentlyUsed: */;
+		}
+		assert(((thePage->headFP)) == theFrame);
+	}
+	else {
+		thePage = makeBaseFrameFor(newContext);
+		theFrame = (thePage->baseFP);
+	}
+	/* begin setStackPageAndLimit: */
+	assert(thePage != 0);
+	GIV(stackPage) = thePage;
+	if (GIV(stackLimit) != (((char *) (((usqInt) -1))))) {
+		GIV(stackLimit) = (GIV(stackPage)->stackLimit);
+	}
+	markStackPageMostRecentlyUsed(thePage);
+	/* begin setStackPointersFromPage: */
+	GIV(stackPointer) = (thePage->headSP);
+	GIV(framePointer) = (thePage->headFP);
+	/* begin setMethod: */
+	aMethodObj = longAt(GIV(framePointer) + FoxMethod);
+	GIV(method) = aMethodObj;
+	assert(isOopCompiledMethod(GIV(method)));
+	
+#  if MULTIPLEBYTECODESETS
+	GIV(bytecodeSetSelector) = (methodUsesAlternateBytecodeSet(GIV(method))
+		? 256
+		: 0);
+#  endif /* MULTIPLEBYTECODESETS */
+;
+	/* begin popStack */
+	top = longAt(GIV(stackPointer));
+	GIV(stackPointer) += BytesPerWord;
+	GIV(instructionPointer) = top;
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
+}
+
 	/* StackInterpreter>>#ultimateLiteralOf: */
 sqInt
 ultimateLiteralOf(sqInt aMethodOop)
@@ -65511,63 +65746,6 @@ checkForEventsMayContextSwitch(sqInt mayContextSwitch)
 }
 
 
-/*	Check whether the VM is unowned and needs to set a thread running to try
-	and own it.
-	Do not attempt this if the image doesn't have a threadId inst var in
-	Process; the VM
-	can't thread these images. */
-
-	/* StackInterpreterMT>>#checkVMOwnershipFromHeartbeat */
-static void
-checkVMOwnershipFromHeartbeat(void)
-{   DECL_MAYBE_SQ_GLOBAL_STRUCT
-    CogVMThread *vmThread;
-
-	sqLowLevelMFence();
-	if (GIV(processHasThreadId)
-	 && ((getVMOwner()) == 0)) {
-		/* begin ensureRunningVMThread: */
-		if (!(tryLockVMToIndex(-1))) {
-
-			/* self cCode: [coInterpreter print: 'ERVT failed to lock'; cr]. */
-			goto l1;
-		}
-		if ((vmThread = willingVMThread())) {
-
-			/* If the VM is relinquishing the processor then only schedule a thread if it has work to do. */
-			if (GIV(relinquishing)
-			 && (((vmThread->state)) != CTMWantingOwnership)) {
-				/* begin releaseVM */
-				setVMOwner(0);
-				goto l1;
-			}
-			setVMOwner((vmThread->index));
-			GIV(vmOSThread) = (vmThread->osThread);
-			ioSignalOSSemaphore((&((vmThread->osSemaphore))));
-			ioTransferTimeslice();
-			goto l1;
-		}
-		if (GIV(relinquishing)) {
-			/* begin releaseVM */
-			setVMOwner(0);
-			goto l1;
-		}
-		if (GIV(memoryIsScarce)
-		 || (((vmThread = unusedThreadInfo())) == null)) {
-			/* begin releaseVM */
-			setVMOwner(0);
-			goto l1;
-		}
-		setVMOwner((vmThread->index));
-		if (!(startThreadForThreadInfo(vmThread))) {
-			/* begin releaseVM */
-			setVMOwner(0);
-		}
-	l1:	/* end ensureRunningVMThread: */;
-	}
-}
-
-
 /*	Release the VM to other threads and answer the current thread's index.
 	Currently valid flags:
 	DisownVMLockOutFullGC	- prevent fullGCs while this thread disowns the VM
@@ -65722,42 +65900,6 @@ enterSmalltalkExecutiveImplementation(void)
 	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), 1, __LINE__);
 	interpret();
 	return 0;
-}
-
-
-/*	Force an interrupt check ASAP. This version is the
-	entry-point to forceInterruptCheck for the heartbeat
-	timer to allow for repeatable debugging.
-	
-	N.B. SYNCHRONIZE WITH deferStackLimitSmashAround: */
-
-	/* StackInterpreterMT>>#forceInterruptCheckFromHeartbeat */
-void
-forceInterruptCheckFromHeartbeat(void)
-{   DECL_MAYBE_SQ_GLOBAL_STRUCT
-	if (!suppressHeartbeatFlag) {
-		/* begin checkForLongRunningPrimitive */
-		if (GIV(longRunningPrimitiveCheckSemaphore) == null) {
-			goto l1;
-		}
-		if ((GIV(longRunningPrimitiveStartUsecs) > 0)
-		 && ((GIV(longRunningPrimitiveCheckMethod) == GIV(newMethod))
-		 && (GIV(longRunningPrimitiveCheckSequenceNumber) == GIV(statCheckForEvents)))) {
-			GIV(longRunningPrimitiveStopUsecs) = ioUTCMicroseconds();
-			assert(GIV(longRunningPrimitiveStopUsecs) > GIV(longRunningPrimitiveStartUsecs));
-			goto l1;
-		}
-		if (GIV(longRunningPrimitiveStopUsecs) == 0) {
-			GIV(longRunningPrimitiveCheckSequenceNumber) = GIV(statCheckForEvents);
-			GIV(longRunningPrimitiveCheckMethod) = GIV(newMethod);
-			GIV(longRunningPrimitiveStartUsecs) = ioUTCMicroseconds();
-			sqLowLevelMFence();
-		}
-	l1:	/* end checkForLongRunningPrimitive */;
-		sqLowLevelMFence();
-		forceInterruptCheck();
-		checkVMOwnershipFromHeartbeat();
-	}
 }
 
 
@@ -67031,49 +67173,6 @@ primitiveVMCurrentThreadId(void)
 	integerVal = GIV(vmOwner);
 	longAtput((sp = GIV(stackPointer) + ((1 - 1) * BytesPerWord)), (((usqInt)integerVal << 3) | 1));
 	GIV(stackPointer) = sp;
-}
-
-	/* StackInterpreterMT>>#primitiveWait */
-static void
-primitiveWait(void)
-{   DECL_MAYBE_SQ_GLOBAL_STRUCT
-    sqInt activeProc;
-    sqInt excessSignals;
-    sqInt objOop;
-    sqInt objOop1;
-    sqInt sema;
-
-	/* begin stackTop */
-	sema = longAt(GIV(stackPointer));
-	excessSignals = fetchIntegerofObject(ExcessSignalsIndex, sema);
-	if (excessSignals > 0) {
-		/* begin storeInteger:ofObject:withValue: */
-		if ((((((usqInt) (excessSignals - 1)) >> 60) + 1) & 15) <= 1) {
-			/* begin storePointerUnchecked:ofObject:withValue: */
-			assert(!(isOopForwarded(sema)));
-			longAtput((sema + BaseHeaderSize) + (((sqInt)((usqInt)(ExcessSignalsIndex) << (shiftForWord())))), (((usqInt)(excessSignals - 1) << 3) | 1));
-		}
-		else {
-			/* begin primitiveFail */
-			if (!GIV(primFailCode)) {
-				GIV(primFailCode) = 1;
-			}
-		}
-	}
-	else {
-
-		/* We're going to switch process, either to an interpreted frame or a machine
-		   code frame. To know whether to return or enter machine code we have to
-		   know from whence we came.  We could have come from the interpreter,
-		   either directly or via a machine code primitive.  We could have come from
-		   machine code.  The instructionPointer tells us where from: */
-		/* begin activeProcess */
-		objOop1 = longAt((GIV(specialObjectsOop) + BaseHeaderSize) + (((sqInt)((usqInt)(SchedulerAssociation) << (shiftForWord())))));
-		objOop = longAt((objOop1 + BaseHeaderSize) + (((sqInt)((usqInt)(ValueIndex) << (shiftForWord())))));
-		activeProc = longAt((objOop + BaseHeaderSize) + (((sqInt)((usqInt)(ActiveProcessIndex) << (shiftForWord())))));
-		addLastLinktoList(activeProc, sema);
-		transferTofrom(wakeHighestPriority(), 10);
-	}
 }
 
 
