@@ -258,6 +258,7 @@ extern sqInt temporaryCountOfMethodHeader(sqInt header);
 extern sqInt ultimateLiteralOf(sqInt aMethodOop);
 extern char * whereIs(sqInt anOop);
 extern sqInt disownVM(sqInt flags);
+extern sqInt disownVMfromVMThread(sqInt flags, CogVMThread *vmThread);
 extern sqInt ownVM(sqInt threadIndexAndFlags);
 extern sqInt tryLockVMOwner(void);
 extern sqInt unlockVMOwner(void);
