@@ -67876,7 +67876,7 @@ transferTofrom(sqInt newProc, sqInt sourceCode)
 		activeContext = longAt(GIV(framePointer) + FoxThisContext);
 		goto l3;
 	}
-	activeContext = marryFrameSP(GIV(framePointer), GIV(stackPointer));
+	activeContext = marryFrameSP(GIV(framePointer), GIV(stackPointer) + BytesPerWord);
 	l3:	/* end ensureFrameIsMarried:SP: */;
 	/* begin storePointer:ofObject:withValue: */
 	assert(!(isForwarded(oldProc)));
