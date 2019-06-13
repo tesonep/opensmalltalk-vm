@@ -1578,17 +1578,17 @@ _iss sqInt primFailCode;
 _iss usqInt method;
 _iss sqInt nilObj;
 _iss StackPage * stackPage;
-_iss sqInt argumentCount;
 _iss char * framePointer;
+_iss sqInt argumentCount;
 _iss sqInt bytecodeSetSelector;
 _iss usqInt freeStart;
 _iss sqInt specialObjectsOop;
+_iss usqInt instructionPointer;
 _iss usqInt endOfMemory;
 _iss usqInt newMethod;
 _iss usqInt newSpaceLimit;
 _iss sqInt messageSelector;
 _iss usqInt oldSpaceStart;
-_iss usqInt instructionPointer;
 _iss SpurSegmentInfo * segments;
 _iss usqInt totalFreeOldSpace;
 _iss sqInt trueObj;
@@ -4677,6 +4677,8 @@ interpret(void)
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				closure = longAt(localFP + (frameStackedReceiverOffset(localFP)));
 
 				/* avoid compiler warning */
@@ -5602,6 +5604,8 @@ interpret(void)
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					if ((((GIV(messageSelector) & (tagMask())) == 0)
 					 && (((longAt(GIV(messageSelector))) & ((classIndexMask()) - (isForwardedObjectClassIndexPun()))) == 0))
 					 || (lkupClassTag == (isForwardedObjectClassIndexPun()))) {
@@ -5679,6 +5683,8 @@ interpret(void)
 						GIV(instructionPointer) = oopForPointer(localIP);
 						GIV(stackPointer) = localSP;
 						GIV(framePointer) = localFP;
+						/* begin assertValidExecutionPointe:r:s: */
+						assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 						/* begin slowPrimitiveResponse */
 						assert(!(isOopForwarded(stackValue(GIV(argumentCount)))));
 						assert((remapBufferCount()) == 0);
@@ -5772,6 +5778,8 @@ interpret(void)
 						GIV(instructionPointer) = oopForPointer(localIP);
 						GIV(stackPointer) = localSP;
 						GIV(framePointer) = localFP;
+						/* begin assertValidExecutionPointe:r:s: */
+						assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 						handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader));
 						/* begin internalizeIPandSP */
 						localIP = pointerForOop(GIV(instructionPointer));
@@ -6050,6 +6058,8 @@ interpret(void)
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					externalDivorceFrameandContext(theFP, obj1);
 					/* begin storePointer:ofObject:withValue: */
 					assert(!(isForwarded(obj1)));
@@ -6304,6 +6314,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				/* begin eeInstantiateSmallClassIndex:format:numSlots: */
 				assert((size >= 0)
 				 && ((knownClassAtIndex(ClassArrayCompactIndex)) != GIV(nilObj)));
@@ -6793,6 +6805,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					checkForEventsMayContextSwitch(1);
 					browserPluginReturnIfNeeded();
 					/* begin internalizeIPandSP */
@@ -6927,6 +6941,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatAdd:toArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -7069,6 +7085,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatSubtract:fromArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -8134,6 +8152,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatMultiply:byArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -8283,6 +8303,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatDivide:byArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -8512,6 +8534,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				/* begin primitiveBitShift */
 				integerArgument = longAt(GIV(stackPointer));
 				if (!((((integerArgument) & 7) == 1))) {
@@ -8629,6 +8653,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				primitiveBitAnd();
 				/* begin internalizeIPandSP */
 				localIP = pointerForOop(GIV(instructionPointer));
@@ -8671,6 +8697,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				primitiveBitOr();
 				/* begin internalizeIPandSP */
 				localIP = pointerForOop(GIV(instructionPointer));
@@ -9580,6 +9608,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin initPrimCall */
 					GIV(primFailCode) = 0;
 					primitiveClosureValue();
@@ -9631,6 +9661,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin initPrimCall */
 					GIV(primFailCode) = 0;
 					primitiveClosureValue();
@@ -10075,6 +10107,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatAdd:toArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -10217,6 +10251,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatSubtract:fromArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -11281,6 +11317,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatMultiply:byArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -11430,6 +11468,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin primitiveFloatDivide:byArg: */
 					if (((tagBits = rcvr & (tagMask()))) != 0) {
 						if (tagBits == (smallFloatTag())) {
@@ -11659,6 +11699,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				/* begin primitiveBitShift */
 				integerArgument = longAt(GIV(stackPointer));
 				if (!((((integerArgument) & 7) == 1))) {
@@ -11776,6 +11818,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				primitiveBitAnd();
 				/* begin internalizeIPandSP */
 				localIP = pointerForOop(GIV(instructionPointer));
@@ -11818,6 +11862,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				primitiveBitOr();
 				/* begin internalizeIPandSP */
 				localIP = pointerForOop(GIV(instructionPointer));
@@ -12662,6 +12708,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin initPrimCall */
 					GIV(primFailCode) = 0;
 					primitiveClosureValue();
@@ -12713,6 +12761,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					/* begin initPrimCall */
 					GIV(primFailCode) = 0;
 					primitiveClosureValue();
@@ -13179,6 +13229,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 				GIV(instructionPointer) = oopForPointer(localIP);
 				GIV(stackPointer) = localSP;
 				GIV(framePointer) = localFP;
+				/* begin assertValidExecutionPointe:r:s: */
+				assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 				/* begin eeInstantiateSmallClassIndex:format:numSlots: */
 				assert((size >= 0)
 				 && ((knownClassAtIndex(ClassArrayCompactIndex)) != GIV(nilObj)));
@@ -13413,6 +13465,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					checkForEventsMayContextSwitch(1);
 					browserPluginReturnIfNeeded();
 					/* begin internalizeIPandSP */
@@ -13585,6 +13639,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					externalDivorceFrameandContext(theFP, obj);
 					/* begin storePointer:ofObject:withValue: */
 					assert(!(isForwarded(obj)));
@@ -13820,6 +13876,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 					GIV(instructionPointer) = oopForPointer(localIP);
 					GIV(stackPointer) = localSP;
 					GIV(framePointer) = localFP;
+					/* begin assertValidExecutionPointe:r:s: */
+					assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 					externalDivorceFrameandContext(theFP, obj);
 					/* begin storePointer:ofObject:withValue: */
 					assert(!(isForwarded(obj)));
@@ -14230,6 +14288,8 @@ longAt((GIV(method) + BaseHeaderSize) + (((sqInt)((usqInt)(HeaderIndex) << (shif
 	GIV(instructionPointer) = oopForPointer(localIP);
 	GIV(stackPointer) = localSP;
 	GIV(framePointer) = localFP;
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	return null;
 }
 
@@ -18978,6 +19038,8 @@ primitiveFailForFFIExceptionat(usqLong exceptionCode, usqInt pc)
 				reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader);
 			}
 		}
+		/* begin assertValidExecutionPointe:r:s: */
+		assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 		longjmp(reenterInterpreter, ReturnToInterpreter);
 	}
 	return 0;
@@ -22312,6 +22374,8 @@ primitiveInvokeObjectAsMethod(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader));
@@ -24468,6 +24532,8 @@ primitivePerformInSuperclass(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader));
@@ -24684,6 +24750,8 @@ primitivePerformWithArgs(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader));
@@ -57110,6 +57178,8 @@ marryContextInNewStackPageAndInitializeInterpreterRegisters(sqInt aContext)
 	top = longAt(GIV(stackPointer));
 	GIV(stackPointer) += BytesPerWord;
 	GIV(instructionPointer) = top;
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 }
 
 
@@ -62201,6 +62271,8 @@ sendInvokeCallbackStackRegistersJmpbuf(sqInt thunkPtr, sqInt stackPtr, sqInt reg
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	/* begin checkForStackOverflow */
 	assert((GIV(framePointer) - GIV(stackPointer)) < (LargeContextSlots * BytesPerOop));
 	assert(GIV(stackPage) == (mostRecentlyUsedPage()));
@@ -62986,6 +63058,8 @@ snapshot(sqInt embedded)
 				reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader);
 			}
 		}
+		/* begin assertValidExecutionPointe:r:s: */
+		assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	}
 	return 0;
 }
@@ -66196,6 +66270,8 @@ preemptDisowningThread(void)
 	/* begin push: */
 	longAtput((sp = GIV(stackPointer) - BytesPerWord), GIV(instructionPointer));
 	GIV(stackPointer) = sp;
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	/* begin externalWriteBackHeadFramePointers */
 	assert((GIV(framePointer) - GIV(stackPointer)) < (LargeContextSlots * BytesPerOop));
 	assert(GIV(stackPage) == (mostRecentlyUsedPage()));
@@ -67412,6 +67488,8 @@ sendInvokeCallbackContext(VMCallbackContext *vmCallbackContext)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	/* begin checkForStackOverflow */
 	assert((GIV(framePointer) - GIV(stackPointer)) < (LargeContextSlots * BytesPerOop));
 	assert(GIV(stackPage) == (mostRecentlyUsedPage()));
@@ -67762,6 +67840,8 @@ threadSwitchIfNecessaryfrom(sqInt newProc, sqInt sourceCode)
 			/* begin push: */
 			longAtput((sp = GIV(stackPointer) - BytesPerWord), GIV(instructionPointer));
 			GIV(stackPointer) = sp;
+			/* begin assertValidExecutionPointe:r:s: */
+			assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 			/* begin externalWriteBackHeadFramePointers */
 			assert((GIV(framePointer) - GIV(stackPointer)) < (LargeContextSlots * BytesPerOop));
 			assert(GIV(stackPage) == (mostRecentlyUsedPage()));
@@ -70303,6 +70383,8 @@ primitiveExecuteMethod(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader2 = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader2));
@@ -70507,6 +70589,8 @@ primitiveExecuteMethodArgsArray(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader2 = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader2));
@@ -71985,6 +72069,8 @@ primitivePerform(void)
 			reapAndResetErrorCodeToheader(GIV(stackPointer), methodHeader1);
 		}
 	}
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	methodHeader = methodHeader1;
 	if (GIV(stackPointer) < GIV(stackLimit)) {
 		handleStackOverflowOrEventAllowContextSwitch(canContextSwitchIfActivatingheader(GIV(newMethod), methodHeader));
@@ -73479,6 +73565,8 @@ primitiveVoidVMState(void)
 	/* begin push: */
 	longAtput((sp = GIV(stackPointer) - BytesPerWord), GIV(instructionPointer));
 	GIV(stackPointer) = sp;
+	/* begin assertValidExecutionPointe:r:s: */
+	assertValidExecutionPointersimbarline(GIV(instructionPointer), GIV(framePointer), GIV(stackPointer), !0, __LINE__);
 	activeContext = voidVMStateForSnapshotFlushingExternalPrimitivesIf(0);
 	marryContextInNewStackPageAndInitializeInterpreterRegisters(activeContext);
 }
