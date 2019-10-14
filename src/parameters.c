@@ -99,20 +99,22 @@ int isConsole(){
 
 void processImageFileName(VM_PARAMETERS* parameters){
 	if(parameters->isDefaultImage){
-		if(!fileExists(parameters->imageFile)){
-			if(!openFileDialog("Choose image file", "", "image", &(parameters->imageFile), DEFAULT_IMAGE_NAME)){
-				printUsage();
-				exit(1);
-			}
-
-			parameters->hasBeenSelectedByUser = true;
-		}
+//		if(!fileExists(parameters->imageFile)){
+//			if(!openFileDialog("Choose image file", "", "image", &(parameters->imageFile), DEFAULT_IMAGE_NAME)){
+//				printUsage();
+//				exit(1);
+//			}
+//
+//			parameters->hasBeenSelectedByUser = true;
+//		}
 		//If there are no parameters, we are next to the launch of the VM, we need to add the interactive flag
 		//As we always have two parameters (the --headless)
-		if(parameters->vmParamsCount == 2 && parameters->imageParamsCount == 0 && !isConsole()){
+		if(parameters->vmParamsCount == 2 && parameters->imageParamsCount == 0){
 			parameters->imageParams = malloc(sizeof(void*));
-			parameters->imageParamsCount = 1;
+			parameters->imageParamsCount = 3;
 			parameters->imageParams[0] = "--interactive";
+			parameters->imageParams[1] = "--readOnlyAccessMode";
+			parameters->imageParams[2] = "--embedded";
 		}
 	}
 }

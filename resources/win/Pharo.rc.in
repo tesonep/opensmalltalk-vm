@@ -1,0 +1,5 @@
+#include "winResources.h"
+
+IDI_PHARO_ICON ICON "@CMAKE_CURRENT_SOURCE_DIR@/resources/win/Pharo.ico"
+
+EMBEDDED_IMAGE RCDATA "@CMAKE_CURRENT_BINARY_DIR@/build/resources/Pharo.image"

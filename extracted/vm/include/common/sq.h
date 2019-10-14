@@ -64,7 +64,7 @@
    can be redefined in sqPlatformSpecific.h if desired. These default
    versions are defined in terms of the ANSI Standard C libraries.
 */
-#define sqImageFile					   FILE *
+#define sqImageFile					  				   FILE *
 #define sqImageFileClose(f)                  		   fclose(f)
 #define sqImageFileOpen(fileName, mode)      		   fopen(fileName, mode)
 #define sqImageFilePosition(f)               		   ftell(f)

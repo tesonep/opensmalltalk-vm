@@ -16,11 +16,15 @@ set(EXTRACTED_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/extracted/vm/src/win/sqWin32Heartbeat.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/aioWin.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/debugWin.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/embeddedImage.c    
 )
+
+configure_file(resources/win/Pharo.rc.in build/resources/win/Pharo.rc)
 
 set(VM_FRONTEND_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/parameters.c
+    ${CMAKE_CURRENT_BINARY_DIR}/build/resources/win/Pharo.rc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/winOpenFileDialog.cpp)
 
 macro(add_third_party_dependencies_per_platform)
@@ -37,7 +41,6 @@ macro(add_third_party_dependencies_per_platform)
     add_third_party_dependency("SDL2-2.0.5" "build/vm")   
     add_third_party_dependency("PThreadedFFI-1.1.2-win64" "build/vm")
 endmacro()
-
 
 macro(configure_installables INSTALL_COMPONENT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/build/dist")
